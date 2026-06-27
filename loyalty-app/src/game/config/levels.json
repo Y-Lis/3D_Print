@@ -1,0 +1,49 @@
+{
+  "levels": [
+    {
+      "level_id": "bf_1",
+      "world_id": "bamboo_forest",
+      "order": 1,
+      "type": "runner",
+      "mode": "story",
+      "energy_cost": 1,
+      "difficulty": "easy",
+      "target_score": 100,
+      "rewards": {
+        "crystals": 10,
+        "exp": 15
+      }
+    },
+    {
+      "level_id": "bf_5",
+      "world_id": "bamboo_forest",
+      "order": 5,
+      "type": "runner",
+      "mode": "story",
+      "energy_cost": 1,
+      "difficulty": "hard",
+      "target_score": 500,
+      "is_boss": true,
+      "rewards": {
+        "crystals": 50,
+        "exp": 100,
+        "map_fragment": "volcano_key"
+      }
+    },
+    {
+      "level_id": "bf_endless",
+      "world_id": "bamboo_forest",
+      "order": 999,
+      "type": "runner",
+      "mode": "endless",
+      "energy_cost": 0,
+      "difficulty": "progressive",
+      "target_score": null,
+      "rewards": {
+        "crystals": 0,
+        "exp": 0,
+        "gives_leaderboard_points": true
+      }
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "worlds": [
+    {
+      "id": "bamboo_forest",
+      "name": "Бамбуковый лес",
+      "description": "Стартовая локация. Древний лес, скрывающий первые загадки ToyVerse.",
+      "required_toys": ["panda", "fox"],
+      "unlock_condition": "buy_any_one", 
+      "total_story_levels": 5,
+      "has_endless_mode": true,
+      "endless_theme": "forest_run",
+      "background_asset": "url_to_cdn/bg_forest.png"
+    },
+    {
+      "id": "volcano_of_fire",
+      "name": "Вулкан Огня",
+      "description": "Раскаленные пещеры. Сюда могут пройти только те, кто не боится жара.",
+      "required_toys": ["red_dragon", "phoenix"],
+      "unlock_condition": "buy_all",
+      "total_story_levels": 10,
+      "has_endless_mode": true,
+      "endless_theme": "lava_escape",
+      "background_asset": "url_to_cdn/bg_volcano.png"
+    }
+  ]
+}

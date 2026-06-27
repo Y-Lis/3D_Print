@@ -1,0 +1,201 @@
+import openpyxl
+from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+from weasyprint import HTML
+import base64
+import os
+
+# --- 1. Generate Excel Template ---
+def create_excel():
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Список гостей"
+    
+    # Headers
+    headers = ["ФИО", "Ряд", "Место", "Примечания"]
+    ws.append(headers)
+    
+    # Styling headers
+    header_font = Font(bold=True, color="FFFFFF")
+    header_fill = PatternFill(start_color="00236A", end_color="00236A", fill_type="solid")
+    for cell in ws[1]:
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = Alignment(horizontal="center")
+    
+    # Sample data
+    sample_data = [
+        ["Ахметов Азамат Серикович", "1", "12", ""],
+        ["Иванова Мария Александровна", "1", "13", ""],
+        ["Смагулов Тимур", "2", "5", "VIP"]
+    ]
+    for row in sample_data:
+        ws.append(row)
+        
+    # Column widths
+    ws.column_dimensions['A'].width = 40
+    ws.column_dimensions['B'].width = 10
+    ws.column_dimensions['C'].width = 10
+    ws.column_dimensions['D'].width = 20
+    
+    excel_path = "Список_гостей_KazGASA.xlsx"
+    wb.save(excel_path)
+    return excel_path
+
+# --- 2. Generate PDF Design ---
+def create_pdf_sample():
+    # Attempt to load logo if available, or use placeholder text
+    logo_base64 = ""
+    logo_path = "KazGASA_45_лет_лого[1] (1) (1).png"
+    if os.path.exists(logo_path):
+        with open(logo_path, "rb") as image_file:
+            logo_base64 = base64.b64encode(image_file.read()).decode('utf-8')
+
+    html_content = f"""
+    <html>
+    <head>
+        <style>
+            @page {{
+                size: 210mm 80mm;
+                margin: 0;
+            }}
+            body {{
+                font-family: 'Montserrat', sans-serif;
+                margin: 0;
+                padding: 0;
+                background-color: #ffffff;
+                color: #00236A;
+            }}
+            .ticket-container {{
+                width: 210mm;
+                height: 80mm;
+                display: flex;
+                position: relative;
+                overflow: hidden;
+                border: 1px solid #00236A;
+            }}
+            .main-part {{
+                width: 155mm;
+                padding: 10mm;
+                position: relative;
+            }}
+            .stub-part {{
+                width: 55mm;
+                border-left: 2px dashed #00236A;
+                padding: 10mm 5mm;
+                background-color: #fafafa;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+            }}
+            .logo {{
+                width: 45mm;
+                margin-bottom: 5mm;
+            }}
+            .header {{
+                font-size: 18pt;
+                font-weight: 900;
+                text-transform: uppercase;
+                margin-bottom: 2mm;
+                color: #A70030;
+            }}
+            .sub-header {{
+                font-size: 11pt;
+                margin-bottom: 8mm;
+            }}
+            .guest-info {{
+                margin-top: 5mm;
+                border-top: 1px solid #FEAC0F;
+                padding-top: 5mm;
+            }}
+            .fio {{
+                font-size: 14pt;
+                font-weight: bold;
+                margin-bottom: 3mm;
+            }}
+            .seat-info {{
+                font-size: 12pt;
+                font-weight: bold;
+            }}
+            .seat-val {{
+                color: #A70030;
+            }}
+            .footer-info {{
+                position: absolute;
+                bottom: 8mm;
+                left: 10mm;
+                font-size: 9pt;
+                line-height: 1.4;
+            }}
+            .control-text {{
+                transform: rotate(-90deg);
+                font-weight: 900;
+                font-size: 20pt;
+                color: #00236A;
+                opacity: 0.1;
+                position: absolute;
+                right: -10mm;
+                top: 40mm;
+            }}
+            .stub-label {{
+                font-size: 10pt;
+                font-weight: bold;
+                margin-bottom: 5mm;
+                color: #A70030;
+                text-transform: uppercase;
+            }}
+            .stub-data {{
+                font-size: 11pt;
+                margin-bottom: 2mm;
+                text-align: center;
+            }}
+            .arrow-decor {{
+                position: absolute;
+                top: 10mm;
+                right: 10mm;
+                color: #FEAC0F;
+                font-size: 24pt;
+            }}
+        </style>
+    </head>
+    <body>
+        <div class="ticket-container">
+            <div class="main-part">
+                <div class="arrow-decor">➔</div>
+                {f'<img src="data:image/png;base64,{logo_base64}" class="logo">' if logo_base64 else '<div style="font-size:24pt; font-weight:bold;">KazGASA 45</div>'}
+                <div class="header">Пригласительный билет</div>
+                <div class="sub-header">Торжественный вечер в честь юбилея Академии</div>
+                
+                <div class="guest-info">
+                    <div class="fio">Уважаемый(ая) Ахметов Азамат Серикович</div>
+                    <div class="seat-info">
+                        РЯД: <span class="seat-val">01</span> &nbsp;&nbsp;&nbsp; 
+                        МЕСТО: <span class="seat-val">12</span>
+                    </div>
+                </div>
+
+                <div class="footer-info">
+                    <strong>Almaty Theatre</strong>, проспект Аль-Фараби, 30<br>
+                    13 апреля 2026 г. | Сбор гостей в 15:00<br>
+                    <span style="color: #A70030;">«Болашықтың негізін бізбен қала!»</span>
+                </div>
+            </div>
+
+            <div class="stub-part">
+                <div class="stub-label">Контроль</div>
+                <div class="stub-data"><strong>Ряд:</strong> 01</div>
+                <div class="stub-data"><strong>Место:</strong> 12</div>
+                <div style="margin-top: 10mm; font-size: 8pt; text-align: center; opacity: 0.5;">
+                    Билет действителен на 1 персону
+                </div>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+    pdf_path = "Образец_билета_KazGASA_45.pdf"
+    HTML(string=html_content).write_pdf(pdf_path)
+    return pdf_path
+
+excel_file = create_excel()
+pdf_file = create_pdf_sample()
