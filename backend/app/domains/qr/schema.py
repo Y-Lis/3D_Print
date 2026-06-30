@@ -1,15 +1,19 @@
 from pydantic import BaseModel
+from datetime import datetime
+from typing import Optional
 
-class QRGenerateRequest(BaseModel):
+class QRGenerateCrm(BaseModel):
     collectible_id: int
-
-class QRScanRequest(BaseModel):
-    token: str
+    burn_bonuses: Optional[int] = 0
 
 class QRResponse(BaseModel):
+    id: int
     token: str
-    is_used: bool
     collectible_id: int
+    burn_bonuses: int
+    is_used: bool
+    created_at: datetime
+    expires_at: datetime
 
     class Config:
         from_attributes = True

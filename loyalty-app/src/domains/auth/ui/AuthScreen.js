@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, SafeAreaView, Alert } from 'react-native';
+import { View, StyleSheet, TextInput, Alert } from 'react-native';
 import { Typography } from '../../../shared/ui/Typography';
 import { Button } from '../../../shared/ui/Button';
-import { Card } from '../../../shared/ui/Card';
-import { Input } from '../../../shared/ui/Input';
 import { theme } from '../../../shared/theme';
 import { authApi } from '../api/authApi';
 
@@ -14,97 +12,129 @@ export const AuthScreen = ({ onAuthSuccess }) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async () => {
-    if (!username || !password) {
+    if (!username.trim() || !password.trim()) {
       Alert.alert('Ошибка', 'Заполните все поля');
       return;
     }
 
+    setIsLoading(false);
     setIsLoading(true);
+
     try {
-      let data;
       if (isLoginMode) {
-        data = await authApi.login(username, password);
+        const response = await authApi.login(username.trim(), password.trim());
+        // Формируем токен формата user_ID для бэкенда
+        const token = `user_${response.user_id}`;
+        onAuthSuccess(token);
       } else {
-        data = await authApi.register(username, password);
-      }
-      
-      // Передаем токен (в нашем случае - 'user_ID') на уровень выше (например, в App.js или Store)
-      // В реальном приложении здесь также происходит сохранение токена в SecureStore/AsyncStorage
-      if (onAuthSuccess) {
-        onAuthSuccess(`user_${data.user_id}`);
+        const response = await authApi.register(username.trim(), password.trim());
+        Alert.alert('Успех', 'Регистрация выполнена! Теперь войдите.');
+        setIsLoginMode(true);
       }
     } catch (error) {
-      Alert.alert('Ошибка', error.message);
+      Alert.alert('Ошибка', error.message || 'Ошибка соединения с сервером');
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <Typography variant="title" weight="bold" color="primary" align="center">
-            ToyVerse
-          </Typography>
-          <Typography variant="md" color="textSecondary" align="center" style={{ marginTop: theme.spacing.sm }}>
-            {isLoginMode ? 'Войдите, чтобы продолжить' : 'Создайте новый аккаунт'}
-          </Typography>
-        </View>
+    <View style={styles.container}>
+      <View style={styles.card}>
+        <Typography variant="h1" color="primary" align="center" weight="bold" style={styles.title}>
+          ToyVerse
+        </Typography>
+        <Typography variant="body" color="textSecondary" align="center" style={styles.subtitle}>
+          {isLoginMode ? 'Войдите, чтобы продолжить' : 'Регистрация нового аккаунта'}
+        </Typography>
 
-        <Card style={styles.card}>
-          <Input 
-            label="Имя пользователя"
-            placeholder="Введите логин"
+        <View style={styles.form}>
+          <Typography variant="sm" color="textSecondary" style={styles.label}>
+            Имя пользователя
+          </Typography>
+          <TextInput
+            style={styles.input}
             value={username}
             onChangeText={setUsername}
             autoCapitalize="none"
+            placeholder="Введи ваш логин"
           />
-          
-          <Input 
-            label="Пароль"
-            placeholder="Введите пароль"
+
+          <Typography variant="sm" color="textSecondary" style={styles.label}>
+            Пароль
+          </Typography>
+          <TextInput
+            style={styles.input}
             value={password}
             onChangeText={setPassword}
             secureTextEntry
+            autoCapitalize="none"
+            placeholder="Введи ваш пароль"
           />
 
-          <Button 
-            title={isLoginMode ? 'Войти' : 'Зарегистрироваться'}
-            onPress={handleSubmit}
-            disabled={isLoading}
-            style={styles.submitButton}
-          />
-        </Card>
+          <View style={styles.actions}>
+            <Button
+              title={isLoading ? 'Загрузка...' : isLoginMode ? 'Войти' : 'Создать аккаунт'}
+              onPress={handleSubmit}
+              disabled={isLoading}
+            />
 
-        <Button 
-          title={isLoginMode ? 'Нет аккаунта? Зарегистрироваться' : 'Уже есть аккаунт? Войти'}
-          variant="surface"
-          onPress={() => setIsLoginMode(!isLoginMode)}
-          disabled={isLoading}
-        />
+            <Button
+              title={isLoginMode ? 'Нет аккаунта? Зарегистрироваться' : 'Уже есть аккаунт? Войти'}
+              onPress={() => setIsLoginMode(!isLoginMode)}
+              variant="secondary"
+              style={styles.switchBtn}
+            />
+          </View>
+        </View>
       </View>
-    </SafeAreaView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: theme.colors.background,
-  },
   container: {
     flex: 1,
-    padding: theme.spacing.lg,
     justifyContent: 'center',
-  },
-  header: {
-    marginBottom: theme.spacing.xl,
+    padding: theme.spacing.lg,
+    backgroundColor: theme.colors.background,
   },
   card: {
+    backgroundColor: theme.colors.surface,
     padding: theme.spacing.lg,
+    borderRadius: theme.radius.lg,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
   },
-  submitButton: {
+  title: {
+    marginBottom: theme.spacing.xs,
+  },
+  subtitle: {
+    marginBottom: theme.spacing.xl,
+  },
+  form: {
+    gap: theme.spacing.sm,
+  },
+  label: {
+    marginBottom: 4,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius.md,
+    padding: theme.spacing.md,
+    backgroundColor: theme.colors.background,
+    fontSize: 16,
+    marginBottom: theme.spacing.md,
+  },
+  actions: {
     marginTop: theme.spacing.md,
-  }
+    gap: theme.spacing.sm,
+  },
+  switchBtn: {
+    marginTop: theme.spacing.xs,
+  },
 });

@@ -1,18 +1,16 @@
 from sqlalchemy.orm import Session
 from backend.app.domains.auth.model import User
+from backend.app.domains.collection.model import CollectionItem
 
 class ProfileRepository:
     def __init__(self, db: Session):
         self.db = db
+        
+    def get_collection_count(self, user_id: int) -> int:
+        return self.db.query(CollectionItem).filter(CollectionItem.user_id == user_id).count()
 
-    def get_by_id(self, user_id: int) -> User | None:
-        return self.db.query(User).filter(User.id == user_id).first()
-
-    def update_stats(self, user_id: int, bonus_points: int, new_level: int) -> User | None:
-        user = self.get_by_id(user_id)
-        if user:
-            user.bonus_balance = bonus_points
-            user.current_level = new_level
-            self.db.commit()
-            self.db.refresh(user)
+    def save(self, user: User) -> User:
+        self.db.add(user)
+        self.db.commit()
+        self.db.refresh(user)
         return user

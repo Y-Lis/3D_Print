@@ -1,59 +1,130 @@
-import React from 'react';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-
-// Импорт экранов из независимых доменов
-import { CatalogScreen } from '../../domains/collectibles/ui/CatalogScreen';
-import { ScannerScreen } from '../../domains/qr/ui/ScannerScreen';
-import { ProfileScreen } from '../../domains/profile/ui/ProfileScreen';
-
-// Импорт токенов дизайна для стилизации нижнего меню
+import React, { useState } from 'react';
+import { View, StyleSheet, TouchableOpacity, SafeAreaView, Platform, StatusBar } from 'react-native';
+import { Typography } from '../../shared/ui/Typography';
 import { theme } from '../../shared/theme';
 
-const Tab = createBottomTabNavigator();
+// Импорты существующих экранов
+import { ScannerScreen } from '../../domains/qr/ui/ScannerScreen';
+import { ProfileScreen } from '../../domains/profile/ui/ProfileScreen';
+// import { CatalogScreen } from '../../domains/catalog/ui/CatalogScreen'; // Раскомментируем, когда дойдем до дизайна каталога
 
 export const MainNavigator = ({ userToken, onLogout }) => {
-  return (
-    <Tab.Navigator
-      screenOptions={{
-        headerShown: false,
-        tabBarActiveTintColor: theme.colors.primary,
-        tabBarInactiveTintColor: theme.colors.textMuted,
-        tabBarStyle: { 
-          backgroundColor: theme.colors.surface,
-          borderTopColor: theme.colors.border,
-          paddingBottom: 5,
-          height: 60,
-        },
-        tabBarLabelStyle: {
-          fontSize: theme.typography.sizes.sm,
-          fontWeight: theme.typography.weights.medium,
-        }
-      }}
-    >
-      <Tab.Screen 
-        name="Каталог" 
-        options={{ tabBarIcon: () => null }} // В будущем здесь можно добавить иконки из Design System
-      >
-        {() => <CatalogScreen />}
-      </Tab.Screen>
-      
-      <Tab.Screen 
-        name="Сканер" 
-      >
-        {/* Передаем функцию onScanSuccess, чтобы сканер мог сказать приложению обновить профиль */}
-        {({ navigation }) => (
+  // По умолчанию открываем Профиль
+  const [activeTab, setActiveTab] = useState('profile');
+
+  const renderScreen = () => {
+    switch (activeTab) {
+      case 'catalog':
+        return (
+          <View style={styles.placeholderContainer}>
+            <Typography variant="h2" weight="bold" color="primary">
+              Каталог
+            </Typography>
+            <Typography variant="body" color="textSecondary">
+              В разработке (применим дизайн позже)
+            </Typography>
+          </View>
+        );
+      case 'scanner':
+        return (
           <ScannerScreen 
             userToken={userToken} 
-            onScanSuccess={() => navigation.navigate('Профиль')} 
+            // После успешного сканирования автоматически перекидываем в профиль
+            onScanSuccess={() => setActiveTab('profile')} 
           />
-        )}
-      </Tab.Screen>
-      
-      <Tab.Screen 
-        name="Профиль" 
-      >
-        {() => <ProfileScreen userToken={userToken} onLogout={onLogout} />}
-      </Tab.Screen>
-    </Tab.Navigator>
+        );
+      case 'profile':
+      default:
+        return <ProfileScreen userToken={userToken} onLogout={onLogout} />;
+    }
+  };
+
+  const tabs = [
+    { id: 'catalog', label: 'Каталог' },
+    { id: 'scanner', label: 'Сканер' },
+    { id: 'profile', label: 'Профиль' },
+  ];
+
+  return (
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
+        
+        {/* ВЕРХНЕЕ НАВИГАЦИОННОЕ МЕНЮ */}
+        <View style={styles.topMenu}>
+          {tabs.map((tab) => {
+            const isActive = activeTab === tab.id;
+            return (
+              <TouchableOpacity
+                key={tab.id}
+                style={[styles.tabButton, isActive && styles.activeTabButton]}
+                onPress={() => setActiveTab(tab.id)}
+                activeOpacity={0.7}
+              >
+                <Typography
+                  variant="sm"
+                  weight={isActive ? 'bold' : 'medium'}
+                  color={isActive ? 'primary' : 'textSecondary'}
+                >
+                  {tab.label}
+                </Typography>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+
+        {/* СОДЕРЖИМОЕ АКТИВНОГО ЭКРАНА */}
+        <View style={styles.content}>
+          {renderScreen()}
+        </View>
+
+      </View>
+    </SafeAreaView>
   );
 };
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: theme.colors.surface,
+    // Обеспечиваем отступ под статус-бар на Android
+    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
+  },
+  container: {
+    flex: 1,
+    backgroundColor: theme.colors.background,
+  },
+  topMenu: {
+    flexDirection: 'row',
+    backgroundColor: theme.colors.surface,
+    paddingVertical: theme.spacing.sm,
+    paddingHorizontal: theme.spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border,
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    // Тень для визуального отделения меню от контента
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  tabButton: {
+    flex: 1,
+    paddingVertical: theme.spacing.sm,
+    alignItems: 'center',
+    borderRadius: theme.radius.md,
+  },
+  activeTabButton: {
+    backgroundColor: theme.colors.background,
+  },
+  content: {
+    flex: 1,
+  },
+  placeholderContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: theme.colors.background,
+  },
+});

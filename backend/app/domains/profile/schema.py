@@ -1,12 +1,21 @@
 from pydantic import BaseModel
 
-class ProfileResponse(BaseModel):
+class ProfileStatsResponse(BaseModel):
     id: int
     username: str
     role: str
-    bonus_balance: int
-    current_level: int
+    balance: int
+    level: int
     energy: int
+    collection_count: int
 
-    class Config:
-        from_attributes = True
+class UpdateUsernameRequest(BaseModel):
+    new_username: str
+
+class UpdatePasswordRequest(BaseModel):
+    old_password: str
+    new_password: str
+
+class ProfileResponse(BaseModel):
+    status: str
+    message: str
