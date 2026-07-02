@@ -6,6 +6,9 @@ class QRGenerateCrm(BaseModel):
     collectible_id: int
     burn_bonuses: Optional[int] = 0
 
+class QRScanRequest(BaseModel):
+    token: str
+
 class QRResponse(BaseModel):
     id: int
     token: str

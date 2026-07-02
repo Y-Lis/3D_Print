@@ -3,33 +3,22 @@ import { View, StyleSheet, TouchableOpacity, SafeAreaView, Platform, StatusBar }
 import { Typography } from '../../shared/ui/Typography';
 import { theme } from '../../shared/theme';
 
-// Импорты существующих экранов
+// Импорты экранов
 import { ScannerScreen } from '../../domains/qr/ui/ScannerScreen';
 import { ProfileScreen } from '../../domains/profile/ui/ProfileScreen';
-// import { CatalogScreen } from '../../domains/catalog/ui/CatalogScreen'; // Раскомментируем, когда дойдем до дизайна каталога
+import { GamesScreen } from '../../domains/games/ui/GamesScreen'; 
 
 export const MainNavigator = ({ userToken, onLogout }) => {
-  // По умолчанию открываем Профиль
   const [activeTab, setActiveTab] = useState('profile');
 
   const renderScreen = () => {
     switch (activeTab) {
-      case 'catalog':
-        return (
-          <View style={styles.placeholderContainer}>
-            <Typography variant="h2" weight="bold" color="primary">
-              Каталог
-            </Typography>
-            <Typography variant="body" color="textSecondary">
-              В разработке (применим дизайн позже)
-            </Typography>
-          </View>
-        );
+      case 'games':
+        return <GamesScreen userToken={userToken} />;
       case 'scanner':
         return (
           <ScannerScreen 
             userToken={userToken} 
-            // После успешного сканирования автоматически перекидываем в профиль
             onScanSuccess={() => setActiveTab('profile')} 
           />
         );
@@ -40,7 +29,7 @@ export const MainNavigator = ({ userToken, onLogout }) => {
   };
 
   const tabs = [
-    { id: 'catalog', label: 'Каталог' },
+    { id: 'games', label: 'Игры' },
     { id: 'scanner', label: 'Сканер' },
     { id: 'profile', label: 'Профиль' },
   ];
@@ -86,7 +75,6 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: theme.colors.surface,
-    // Обеспечиваем отступ под статус-бар на Android
     paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
   },
   container: {
@@ -102,7 +90,6 @@ const styles = StyleSheet.create({
     borderBottomColor: theme.colors.border,
     justifyContent: 'space-between',
     alignItems: 'center',
-    // Тень для визуального отделения меню от контента
     elevation: 4,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -120,11 +107,5 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-  },
-  placeholderContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: theme.colors.background,
   },
 });

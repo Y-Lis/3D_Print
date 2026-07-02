@@ -12,6 +12,7 @@ from backend.app.domains.qr.router import router as qr_router
 from backend.app.domains.collection.router import router as collection_router
 from backend.app.domains.admin.router import router as admin_router
 from backend.app.domains.crm.router import router as crm_router
+from backend.app.domains.games.router import router as games_router
 
 # Импорт регистраторов событий (Event Driven Architecture)
 from backend.app.domains.collection.events import register_collection_events
@@ -22,7 +23,7 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="ToyVerse API", description="Clean Architecture & Event Driven DDD", version="2.0.0")
 
-# Настройка CORS
+# Настройка CORS для работы с веб-версией React Native
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -44,6 +45,7 @@ app.include_router(qr_router)
 app.include_router(collection_router)
 app.include_router(admin_router)
 app.include_router(crm_router)
+app.include_router(games_router)
 
 @app.get("/health", tags=["System"])
 def health_check():

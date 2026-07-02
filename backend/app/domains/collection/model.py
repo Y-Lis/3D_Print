@@ -1,13 +1,11 @@
-from sqlalchemy import Column, Integer, DateTime
 from datetime import datetime
-from backend.app.shared.database.base import Base
+from sqlalchemy import Column, Integer, DateTime, ForeignKey
+from backend.app.shared.database.connection import Base
 
-class UserCollection(Base):
-    __tablename__ = "user_collections"
-    
+class CollectionItem(Base):
+    __tablename__ = "collection"
+
     id = Column(Integer, primary_key=True, index=True)
-    # По правилам DDD мы храним только ID, а не ForeignKey, 
-    # чтобы домены оставались независимыми и их можно было вынести в микросервисы.
-    user_id = Column(Integer, index=True)
-    collectible_id = Column(Integer, index=True)
-    acquired_at = Column(DateTime, default=datetime.utcnow)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    collectible_id = Column(Integer, ForeignKey("collectibles.id"), nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)

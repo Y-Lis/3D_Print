@@ -17,7 +17,8 @@ class AuthService:
 
     def login(self, username: str, password: str) -> int:
         user = self.repository.get_user_by_username(username)
-        if not user or user.password_hash != password:
+        # ИСПРАВЛЕНО: обращаемся к user.password, а не user.password_hash
+        if not user or user.password != password:
             raise HTTPException(status_code=400, detail="Неверные данные")
         return user.id
 
